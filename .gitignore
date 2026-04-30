@@ -1,0 +1,13 @@
+# Setup output (your local-only configuration)
+setup.config.env
+
+# Build artifacts
+_build/
+
+# Obsidian local-only state
+vault/.obsidian/workspace.json
+vault/.obsidian/workspace-mobile.json
+vault/.obsidian/graph.json
+
+# OS noise
+.DS_Store
