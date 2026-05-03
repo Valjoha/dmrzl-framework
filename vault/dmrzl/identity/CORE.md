@@ -3,6 +3,7 @@ tags: [dmrzl, identity]
 type: config
 status: active
 audience: public
+maturity: stable
 ---
 # CORE.md — Shared Workspace Rules
 
@@ -14,15 +15,15 @@ audience: public
 ## 1. Language Policy
 
 - **Documentation & code comments**: English only.
-- **User communication**: follows the `language` value configured in [[dmrzl/identity/PERSONA|PERSONA]] (set via `LANGUAGE` in `setup.config.env`). If the user consistently writes in a different language, follow the user's actual language.
+- **User communication**: Ukrainian. Feminine grammatical forms. No Russian.
 - **Options**: numbers or descriptive names — never A/B/C lettering.
 - **Emojis**: sparingly, only when they improve scanning.
 - **Scope**: applies to all agents and platforms.
 
 ## 2. Workspace Layout
 
-- `{{src_dir}}/` — your project's source root (e.g. `src/`, `Sources/`, `lib/` — whatever the target codebase uses).
-- `vault/` — single source of truth for all documentation (Obsidian Vault). Obsidian CLI available for index-aware search, backlinks, tags — see [[dmrzl/tooling/OBSIDIAN_CLI|Obsidian CLI]].
+- `{{src_dir}}/` — Unity project root (`Assets/`, `Packages/`, `ProjectSettings/`).
+- `vault/` — single source of truth for all documentation (Obsidian Vault). Obsidian MCP (`mcp__obsidian__*`) is the primary vault interface for Claude Code sessions.
 
 ### Frontmatter Standards
 
@@ -52,7 +53,7 @@ sources: ["https://example.com/paper", "[[darwin/technical/architecture]]"]
 
 **Direct questions** → answer inline. No sub-agents.
 
-**Tasks** (`create` / `fix` / `refactor` / `analyze` / `build` / equivalents in your configured language):
+**Tasks** (`зроби` / `create` / `fix` / `refactor` / `analyze`):
 1. Clarify scope and expected outcome.
 2. Present plan and chosen tools.
 3. Wait for user approval before execution.
@@ -97,9 +98,30 @@ When acting on prior subagent results:
 - **Read the actual output**, not your summary of it — summaries lose detail
 - **Specify exactly** what to do: file paths, line numbers, concrete actions
 - **Never write** "based on your findings" — that phrase means you didn't read the findings
-- Applies to orchestrator synthesizing ANY subagent output
+- Applies to orchestrator synthesizing ANY subagent/Codex output
 
 ## 4b. Discipline Rules
+
+### Skill Invocation Discipline
+
+**If a skill might apply — even at 1% confidence — invoke it before any other action.**
+
+Skills are the workspace's distilled discipline. Skipping them means redoing work the workspace already solved. Applies to questions, exploration, "simple" tasks — everything.
+
+**Red-flag thoughts (each means STOP and invoke):**
+- "This is just a question" — questions are tasks; check skills.
+- "Let me explore first" — skills tell you HOW to explore.
+- "I'll check files first" — files lack conversation context.
+- "This is too simple for a skill" — simple things become complex.
+- "I remember how this skill works" — skills evolve; read current.
+
+**Priority order when multiple skills match:**
+1. Process skills (`dmrzl-spec`, `dmrzl-debug`) — determine HOW to approach.
+2. Implementation skills (`dmrzl-dots`, domain skills) — guide execution.
+
+Example: "Build X" → `dmrzl-spec` first, then domain skill. "Fix bug" → `dmrzl-debug` first, then domain skill.
+
+**User instructions outrank skills.** If CLAUDE.md or a direct request conflicts with a skill, the user wins.
 
 ### Verification Before Completion
 Any claim of "done/works/fixed" REQUIRES evidence:
@@ -109,17 +131,38 @@ Any claim of "done/works/fixed" REQUIRES evidence:
 4. Only then assert
 Forbidden without evidence: "should work", "probably fixed", "seems to pass"
 
+### Test-Driven Development
+
+**No production code without a failing test first.** Applies to new features, bug fixes, refactors, behavior changes.
+
+**Cycle (RED → GREEN → REFACTOR):**
+1. **RED** — write minimal test for the behavior you want. ONE test, real code, no mocks unless unavoidable.
+2. **Verify RED** — run the test. Confirm it fails for the right reason (feature missing, not typo). Mandatory, never skip.
+3. **GREEN** — write simplest code that makes it pass. No extras, no YAGNI features.
+4. **Verify GREEN** — run the test. Confirm pass. Confirm other tests still pass.
+5. **REFACTOR** — clean up while green. Don't add behavior.
+
+**Iron Law violations to delete on sight:**
+- Code written before test → delete and start over (don't keep as "reference", don't "adapt while writing tests")
+- Test written after code → tests-after answer "what does this do?", not "what should this do?"
+- Test passes immediately → you're testing existing behavior; rewrite the test
+- "Just this once" rationalizations → that's the rationalization itself, ignore it
+
+**Exceptions** (ask user first): throwaway prototypes, generated code, configs.
+
+**Bug fix protocol:** reproduce bug as failing test FIRST. Fix is proven by test going green. Test prevents regression. Never fix bugs without a test.
+
 ### Systematic Debugging (pipeline-first)
 
 **Never tweak parameters. Trace the pipeline.**
 
-Debugging behavior bugs is NOT "change threshold → retest → repeat". That pattern can burn 10+ sessions on a single bug (lesson from sessions 38-47 of the originating project). The correct approach:
+Debugging ECS behavior bugs is NOT "change threshold → retest → repeat". That loop burned 10 sessions (38-47). The correct approach:
 
-1. **Map the pipeline** — before any fix, list every stage data travels through (example: input file → reader → command queue → executor system → live state)
+1. **Map the pipeline** — before any fix, list every stage data travels through (e.g., scenario file → CommandReader → CommandExecutorSystem → EntitySpawnSystem → live ECS world)
 2. **Infrastructure before logic** — verify data *arrives* at the system before debugging the system's logic. If commands don't reach CommandExecutor, GOAP planner logic is irrelevant.
 3. **Evidence at each layer** — add diagnostic log/telemetry at each boundary. Don't advance to next layer without proof current layer works.
 4. **One variable at a time** — change ONE thing per iteration. If it breaks, instant rollback.
-5. **2 failures = stop and escalate** — if the same fix fails twice, the mental model is wrong. Stop and escalate to user.
+5. **2 failures = stop and escalate** — if the same fix fails twice, the mental model is wrong. Stop and escalate to user. Optionally: run `/codex:rescue` for cross-model diagnosis (GPT-5.4, separate billing) before escalating.
 **Anti-patterns (banned):**
 - Parameter tweaking loops ("try 0.7... now 0.5... now 0.8...")
 - Debugging with stale logs from previous runs

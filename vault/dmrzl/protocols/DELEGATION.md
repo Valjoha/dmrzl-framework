@@ -159,6 +159,14 @@ Assets/Codebase/Core/Data/. Use Read to examine the top files. Quick scan — ~1
 | Documentation lookup | researcher | Sonnet | Web search + doc fetching + deep analysis |
 
 
+## 6b. External Codex Operator
+
+> Full protocol: [[dmrzl/tooling/CODEX|CODEX.md]].
+
+
+## 6c. External Gemini Operator
+
+> Full protocol: [[dmrzl/tooling/GEMINI_CLI|GEMINI_CLI.md]].
 
 
 ## 7. Agent Teams (Parallel Persistent Teammates)

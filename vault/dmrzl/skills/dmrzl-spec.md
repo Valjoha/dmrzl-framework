@@ -106,7 +106,7 @@ Plans support versioning. When revising a plan after user feedback:
 - Format: `### vN (YYYY-MM-DD) — [summary of changes]`
 - Never delete previous versions from history — append only
 
-## Design Gate (absorbed from superpowers:brainstorming)
+## Design Gate
 
 ### Hard Gate
 Any new feature or significant behavior change MUST go through this skill.

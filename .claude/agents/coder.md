@@ -107,7 +107,7 @@ bash .claude/scripts/run-unity-tests.sh --platform EditMode
 # PlayMode tests
 bash .claude/scripts/run-unity-tests.sh --platform PlayMode
 # Check CI status (every push to main triggers this)
-gh run list --repo {{github_owner}}/{{project_name}} --workflow=ci.yml --limit 1
+gh run list --repo Valjoha/{{project_name}} --workflow=ci.yml --limit 1
 ```
 
 ## CI Awareness

@@ -1,6 +1,13 @@
 ---
+name: dmrzl-spec
 description: "Deep feature specification and design through collaborative dialogue before implementation. Use when user says 'spec this feature', 'plan before coding', 'what are the edge cases', 'design this', 'brainstorm', 'let's think through', or before any big feature or significant behavior change. Hard gate: no code until design approved. Produces a plan saved to vault/{{project_slug}}/management/plans/. Do NOT use for small tasks, bug fixes, or hotfixes."
 audience: public
+category: workflow
+platforms: [general]
+cache_safe: true
+tags: [design, spec, brainstorm, planning, hard-gate]
+related_skills: [dmrzl-grill, dmrzl-research, dmrzl-review]
+requires_tools: [obsidian-mcp-rs]
 ---
 # Spec Developer + Design Gate
 Load full instructions from `vault/dmrzl/skills/dmrzl-spec.md`.

@@ -3,121 +3,85 @@ name: session-handoff
 tags: [dmrzl, skill, session]
 type: skill
 status: active
-description: "End-of-session distillation and handoff. Use when user says 'handoff', 'wrap up', 'end session', or is finishing a work session. Extracts decisions, patterns, state changes into memory files and writes HANDOFF.md. Do NOT use mid-session — use save-session for incremental saves."
+description: "End-of-session distillation and handoff. Use when user says 'handoff', 'wrap up', 'end session', or is finishing a work session. Extracts decisions, patterns, state changes into memory files and finalizes the per-session handoff file. Do NOT use mid-session — use save-session for incremental saves."
 audience: public
 ---
 
-# Session Handoff & Distillation
+# Session Handoff & Distillation — Long Form
 
-> Up: [[dmrzl/skills|Skills]]
+> Up: [[dmrzl/skills|Skills]] · Short form: `.claude/skills/dmrzl-handoff/SKILL.md` · `.gemini/skills/dmrzl-handoff/SKILL.md`
 
-Use this protocol at the end of every work session (or when explicitly asked to wrap up).
+Use this protocol at the end of every work session (or when explicitly asked to wrap up). Spec: `vault/{{project_slug}}/management/plans/2026-05-02-handoff-per-session-split-spec.md`.
+
+## Per-Session Model
+
+Every session has its own file at `vault/dmrzl/session/handoffs/S{N}.md`. `next-session.sh` creates it as a `status: active` stub at session start. `dmrzl-handoff` finalizes it with `status: complete` and full content.
+
+`vault/dmrzl/session/INDEX.md` is a markdown table — one row per session — that gives a fast overview without loading individual session files. Updated via `.claude/scripts/append-index-row.sh` (mkdir-locked, idempotent replace per session number).
+
+There is **no longer** a single shared `HANDOFF.md`. The pre-S171 history lives frozen in `vault/archive/HANDOFF-pre-split.md`.
 
 ## Platform Tools
 
 - **Claude Code**:
-  - Vault reads: Obsidian CLI (`obsidian read file=X`) — primary. Grep/Glob as fallback.
-  - Vault writes: `Edit` tool. New files: `Write` tool.
-  - Rule: never use `Read` tool on `vault/` files when Obsidian CLI is available.
-- **Codex / Pi / OpenClaw**:
-  - Vault reads: direct filesystem reads (`rg`, `sed`, targeted file reads).
-  - Vault writes: targeted edits through the platform's file-edit tools.
-  - Rule: prefer the live vault files in `vault/dmrzl/` and `vault/{{project_slug}}/`; do not invent platform-local shadow copies.
+  - Vault reads: Obsidian MCP (`mcp__obsidian__read-note`) — primary. Edit tool for writes.
+  - Rule: never use `Read` tool on `vault/` files when Obsidian MCP is available.
+- **Gemini CLI**:
+  - Direct file-read tools (`read_file`); same paths as Claude.
+- **Codex**:
+  - Filesystem reads (`rg`, `sed`); targeted writes via Codex tools.
+  - Same vault paths; do not invent shadow copies.
 
 ## Cross-Platform Rules
 
-- `HANDOFF.md` is shared continuity for all platforms. Keep it platform-agnostic.
-- Always record the runtime that produced the handoff:
-  - `Platform:` one of `Claude Code`, `Codex`, `Pi`, `OpenClaw`
-  - `Models used:` every model that materially contributed to the session
-- `Platform` is the execution surface, not the project name.
-- `Models used` is the contributor list, not just the final orchestrator model.
+- `S{N}.md` is **per-session** and is owned by the platform that opened that session number. Hard-coded per skill: Claude → `platform: claude-code`, Gemini → `platform: gemini-cli`, Codex → `platform: codex`.
+- `INDEX.md` is shared continuity for all platforms. Append-only via `append-index-row.sh`.
+- `models:` frontmatter list is the contributor list for that session, not just the orchestrator.
+- `compact:` is ≤200 chars and survives context compaction. The agent can recover state by re-reading its own `S{N}.md` after compaction.
 
 ## Steps
 
-1. **Review today's daily log** (`vault/{{project_slug}}/log/YYYY-MM-DD.md`) if one exists
+1. **Read own stub** (`vault/dmrzl/session/handoffs/S{N}.md`) to confirm session number and start time.
 2. **Extract decisions** → append to `vault/{{project_slug}}/log/decisions.md`
 3. **Extract patterns/gotchas** → append to `vault/{{project_slug}}/log/patterns.md`
 4. **Update architecture** → `vault/{{project_slug}}/log/project-state.md` (if changed)
-5. **Write HANDOFF.md** → `vault/dmrzl/session/HANDOFF.md`
-6. **Session rating** — ask the user to rate the session (see below)
+5. **Write `S{N}.md`** with `status: complete` and full body (see schema below). MUST happen before step 6.
+6. **Append-index row** via `.claude/scripts/append-index-row.sh` (locked, idempotent — replaces the `(in progress)` row).
+7. **Session rating** — ask user inline (`Оцінка сесії N? (1–5)`), append to `vault/dmrzl/session/session-ratings.jsonl`.
 
-## HANDOFF.md Format
+## S{N}.md Schema
 
-```markdown
-# Session Handoff
-
-## Current Session: YYYY-MM-DD (Session N: short title, platform session)
-
-### Summary
-
-One short paragraph describing the session outcome.
-
-### Session Texture
-
-- **Momentum:** [high/medium/low — was the session flowing or grinding?]
-- **In-flight:** [what was actively being worked on when session ended]
-- **Energy shift:** [did momentum change during session? when and why?]
-
-### Key Accomplishments
-
-1. ...
-
-### Decisions Made
-
-1. ...
-
-### Current State
-
-- what's working
-- what's in progress
-- what's intentionally deferred
-
-### Known Issues
-
-1. ...
-
-### Next Steps
-
-1. ...
-
-### Previous Session
-
-Session N-1 (YYYY-MM-DD): short reference.
-
+```yaml
 ---
-
-**Session created**: YYYY-MM-DD
-**Platform**: Codex
-**Orchestrator**: DMRZL | Codex | Pi | OpenClaw
-**Models used**: gpt-5.4, sonnet
-**Status**: short end-state
-**User feedback**: pending | ★N/5 — short note
+tags: [dmrzl, session, handoff]
+type: handoff
+status: complete
+session: 171
+date: 2026-05-02
+platform: claude-code   # claude-code | codex | gemini-cli
+started: 17:30
+ended: 19:45
+models: [opus, sonnet]
+rating: 5
+compact: "≤200 chars summary that survives compaction"
+title: "short noun phrase"
+---
 ```
 
-Keep the section names stable so every platform can read and update the same structure.
+Body sections (markdown): Summary · Key Accomplishments · Decisions Made · Current State · Known Issues · Next Steps · Token Usage. No "Previous Session" rotation (each session is self-contained). No subjective "Session Texture" (not actionable).
 
-## Session Rating (Step 6)
+## Session Rating (Step 7)
 
-After HANDOFF.md is written, ask the user for:
+After `S{N}.md` is finalized:
 
-1. **Rating** — "Rate this session? (1–5)" with choices:
-   `["1 — failure", "2 — weak", "3 — ok", "4 — good", "5 — excellent"]`
-2. **Note** — "Want to leave a note? (optional)" — free text, skip if user declines
-
-(Translate the user-facing strings to your configured `LANGUAGE` before asking.)
-
-Use the platform-native interaction method:
-- Claude Code: `AskUserQuestion`
-- Codex / Pi / OpenClaw: normal direct user prompt or the platform's equivalent input tool
-
-Then:
-- Append JSON line to `.claude/feedback-loops/session-ratings.jsonl`:
-  `{"date": "YYYY-MM-DD", "rating": N, "note": "...", "ts": "ISO8601"}`
-- Append `**Session rating:** ★N/5 — "note"` to today's vault memory file
-- If 3+ entries exist in the log, show the rolling average (last 5 sessions)
+1. Ask inline (plain text, no `AskUserQuestion`): `Оцінка сесії N? (1–5)`
+2. Append JSON line:
+   ```bash
+   echo '{"session":N,"date":"YYYY-MM-DD","rating":R,"title":"...","models":[...],"platform":"Claude Code"}' \
+       >> vault/dmrzl/session/session-ratings.jsonl
+   ```
+3. Update `rating:` field in `S{N}.md` frontmatter and re-run `append-index-row.sh` (idempotent — overwrites the existing row with new rating).
 
 ## Daily Log Format
 
-Use template from `vault/{{project_slug}}/log/TEMPLATE.md` if it exists. Key sections: Tasks, Decisions, Learned, Handoff, Tags.
-Tags enable search: `#spawn #refactor #bug #performance #architecture`
+Use template from `vault/{{project_slug}}/log/TEMPLATE.md` if one exists. Key sections: Tasks, Decisions, Learned, Handoff, Tags. Tags enable search: `#spawn #refactor #bug #performance #architecture`. Daily log is independent from `S{N}.md` — both can be updated.

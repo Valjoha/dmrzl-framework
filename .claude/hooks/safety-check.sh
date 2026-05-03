@@ -1,11 +1,19 @@
 #!/bin/bash
 # AUDIENCE: public
 # Safety hook — blocks destructive shell commands
-# Called by Claude Code pre-tool-use hook for Bash tool
-# Input: JSON on stdin with tool_input.command
+# Cross-platform: Claude Code (Bash tool) + Gemini CLI (run_shell_command)
+# Input: JSON on stdin (BeforeTool / PreToolUse event)
 
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('command',''))" 2>/dev/null)
+COMMAND=$(echo "$INPUT" | python3 -c "
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    ti = d.get('tool_input', d.get('params', d))
+    print(ti.get('command') or ti.get('cmd') or '')
+except Exception:
+    print('')
+" 2>/dev/null)
 
 [ -z "$COMMAND" ] && exit 0
 

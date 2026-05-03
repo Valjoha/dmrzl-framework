@@ -1,6 +1,13 @@
 ---
 description: "Multi-stage code review for changed files. Stage 1: spec/plan compliance (Sonnet). Stage 2: code quality (Sonnet). Optional Stage 3: cross-model review for blind-spot coverage. Use when user says 'review code', 'check my changes', 'review PR', 'prepare for merge', or after completing a significant task (2+ files or new public API). Do NOT use for git operations."
 audience: public
+name: dmrzl-review
+category: workflow
+platforms: [general]
+cache_safe: true
+tags: [code-review, quality, spec-compliance, cross-model]
+related_skills: [dmrzl-spec, dmrzl-debug]
+requires_tools: [rider-mcp]
 ---
 # Three-Stage Code Review
 
@@ -29,6 +36,25 @@ Dispatch Sonnet subagent (read-only) with prompt from REFERENCE.md §"Stage 1". 
 ### Stage 2: Code Quality
 Dispatch Sonnet subagent (read-only) with prompt from REFERENCE.md §"Stage 2". Reviewer reads `vault/dmrzl/skills/review-rubric.md` first, then evaluates each applicable criterion as PASS/FAIL with file:line references. Severity: Critical (blocks merge) / Important (fix before merge) / Minor (note for later).
 
+
+### Stage 3: Cross-Model Review (Codex)
+After Stages 1-2, run Codex review for cross-model blind-spot coverage. GPT-5.4, separate OpenAI billing — saves Opus tokens.
+
+Standard review (most cases):
+```
+/codex:review --wait
+```
+
+Adversarial review (before merge of major features, 5+ files, architectural changes):
+```
+/codex:adversarial-review --wait
+```
+
+**Rules:**
+- Present Codex findings verbatim — do not paraphrase or auto-fix
+- Issues that Stages 1-2 missed → flag as "Cross-model finding"
+- Codex review is advisory — user decides which findings to act on
+- Skip Stage 3 for single-file tweaks (same threshold as skip-review)
 
 ## Issue Handling
 

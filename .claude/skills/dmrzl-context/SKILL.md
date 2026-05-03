@@ -1,6 +1,13 @@
 ---
 description: "Smart vault context retrieval. Expands a topic query into related terms via GLOSSARY.md, then searches the vault and returns ranked results. Use when: agent needs vault context for a topic ('what do we know about X?', 'context for Y', 'load context on Z'), or before starting work on any domain area. Do NOT use for: simple file reads, git history, or code-only questions."
 audience: public
+name: dmrzl-context
+category: tools
+platforms: [general]
+cache_safe: true
+tags: [vault, context-retrieval, search]
+related_skills: [dmrzl-spec, dmrzl-research]
+requires_tools: [obsidian-mcp-rs]
 ---
 # /dmrzl-context — Smart Vault Retrieval
 

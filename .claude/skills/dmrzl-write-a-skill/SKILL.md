@@ -2,6 +2,12 @@
 name: dmrzl-write-a-skill
 description: Create a new DMRZL skill (`.claude/skills/dmrzl-*/SKILL.md`) with proper structure, trigger description, and ≤100-line discipline. Use when user says 'write a skill', 'new skill', 'create skill', 'додай скіл', 'напиши скіл', or wants to author/refactor any DMRZL skill. Enforces dmrzl- naming, vault references, hook tracking compatibility. Skill vs agent decision baked in.
 audience: public
+category: tools
+platforms: [general]
+cache_safe: true
+tags: [meta, skill-authoring, framework]
+related_skills: [skill-evolve]
+requires_tools: []
 ---
 
 # Write a DMRZL Skill
@@ -100,3 +106,8 @@ Before declaring done, verify:
 - Description without trigger phrases — agent guesses, mistriggers
 - Duplicating CLAUDE.md or CORE.md content — skill should reference, not restate
 - Skill that wraps a single tool call — just call the tool inline
+- Workflow summary in description — agent reads description and skips skill body, taking the shortcut
+
+## Going Deeper
+
+For TDD-for-skills (RED-GREEN-REFACTOR), pressure scenarios, CSO patterns, rationalization tables, and bulletproofing discipline skills against rationalization, see `vault/dmrzl/skills/dmrzl-write-a-skill.md` (long form). Load it when designing a discipline-enforcing skill or when the SKILL.md body alone isn't producing the agent compliance you need.

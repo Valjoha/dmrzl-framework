@@ -13,14 +13,11 @@ WORKSPACE="$(cd "$SCRIPT_DIR/../.." && pwd)"
 COUNTER_FILE="$WORKSPACE/.claude/session-counter.txt"
 LOCK_DIR="$WORKSPACE/.claude/session-counter.lock"
 SESSION_LOG="$WORKSPACE/.claude/session-log.jsonl"
+HANDOFFS_DIR="$WORKSPACE/vault/dmrzl/session/handoffs"
 
-# Stale lock cleanup (>10 seconds old)
-if [ -d "$LOCK_DIR" ]; then
-    lock_age=$(( $(date +%s) - $(stat -f %m "$LOCK_DIR" 2>/dev/null || echo 0) ))
-    if [ "$lock_age" -gt 10 ]; then
-        rmdir "$LOCK_DIR" 2>/dev/null || true
-    fi
-fi
+# Note: no stale-lock cleanup — lock window is ~50ms.
+# A "stale" lock means a real bug (crashed process holding it). Surface it,
+# don't auto-clear. See spec 2026-05-02-handoff-per-session-split-spec.md §5.2.
 
 # Peek mode — no lock needed, just read
 if [ "${1:-}" = "--peek" ]; then
@@ -85,5 +82,45 @@ echo "$next" > "$FEEDBACK_DIR/.current-session"
 start_time="$(date '+%H:%M')"
 start_iso="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 echo "{\"session\":${next},\"event\":\"start\",\"time\":\"${start_time}\",\"iso\":\"${start_iso}\"}" >> "$SESSION_LOG"
+
+# Create per-session handoff stub (status: active) and append starter row to INDEX.
+# Platform comes from the PLATFORM env var, set by each platform's startup hook.
+# Default fallback = claude-code (current dominant case).
+PLATFORM="${PLATFORM:-claude-code}"
+STUB="$HANDOFFS_DIR/S${next}.md"
+
+if [ ! -d "$HANDOFFS_DIR" ]; then
+    mkdir -p "$HANDOFFS_DIR"
+fi
+
+if [ ! -f "$STUB" ]; then
+    today="$(date +%Y-%m-%d)"
+    cat > "$STUB" <<EOF
+---
+tags: [dmrzl, session, handoff]
+type: handoff
+status: active
+session: ${next}
+date: ${today}
+platform: ${PLATFORM}
+started: ${start_time}
+ended: ~
+models: []
+rating: ~
+compact: ~
+title: ~
+---
+
+# Session ${next}
+
+> Up: [[../INDEX|INDEX]]
+EOF
+    # Best-effort INDEX update; do not fail next-session.sh if it errors
+    bash "$SCRIPT_DIR/append-index-row.sh" \
+        "${next}" "${today}" "${PLATFORM}" \
+        "(in progress)" "-" "-" 2>/dev/null || true
+else
+    echo "WARNING: stub S${next}.md already exists — refusing to overwrite" >&2
+fi
 
 echo "$next"
