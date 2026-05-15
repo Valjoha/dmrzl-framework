@@ -8,7 +8,10 @@ cache_safe: true
 tags: [design, spec, brainstorm, planning, hard-gate]
 related_skills: [dmrzl-grill, dmrzl-research, dmrzl-review]
 requires_tools: [obsidian-mcp-rs]
+type: config
+status: active
 ---
+<!-- GENERATED FROM vault/dmrzl/skills-src/dmrzl-spec/SKILL.md -- DO NOT EDIT. Run sync-skills.py to refresh. -->
 # Spec Developer + Design Gate
 Load full instructions from `vault/dmrzl/skills/dmrzl-spec.md`.
 

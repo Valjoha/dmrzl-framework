@@ -1,5 +1,5 @@
 ---
-type: protocol
+type: config
 tags: [dmrzl, protocol]
 status: active
 audience: public

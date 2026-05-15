@@ -1,12 +1,11 @@
 ---
 name: dmrzl-review
 tags: [dmrzl, skill]
-type: skill
+type: config
 status: active
 description: "Two-stage code review for changed files. Stage 1: spec/plan compliance. Stage 2: code quality (ECS patterns, security, performance). Use when user says 'review code', 'check my changes', 'review PR', 'prepare for merge', or after completing a significant task (2+ files or new public API). Do NOT use for git operations."
 audience: public
 ---
-
 # Two-Stage Code Review
 
 > Up: [[dmrzl/skills|Skills]]

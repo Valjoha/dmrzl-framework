@@ -1,10 +1,9 @@
 ---
-type: protocol
+type: config
 tags: [dmrzl, protocol]
 status: active
 audience: public
 ---
-
 # DELEGATION PROTOCOL
 
 > Up: [[dmrzl/identity/CORE|CORE]]
@@ -145,18 +144,30 @@ Assets/Codebase/Core/Data/. Use Read to examine the top files. Quick scan — ~1
 - Never re-delegate same task to another subagent without changing approach.
 - Partial results are valuable — report what was found.
 
-## 6. Model Selection for Subagents
+## 6. Default Routing by Task Pattern (token-economy first)
 
-| Task type | Agent | Model | Rationale |
-|-----------|-------|-------|-----------|
-| Log analysis, simple reads | Explore / secretary | Haiku | Fast, cheap, sufficient |
-| Codebase exploration | Explore | Haiku | Built-in, read-only |
-| Architecture analysis | architect | Opus | Deep reasoning needed |
-| Documentation updates | secretary | Haiku | Routine, structured |
-| Code implementation | coder | Sonnet | Precision executor with brief, uses Sonnet quota bucket |
-| Code review | dmrzl-review skill | Sonnet | Two-stage review (spec + quality) |
-| Game balance analysis | dmrzl-dots skill | Sonnet | Domain absorbed into dots |
-| Documentation lookup | researcher | Sonnet | Web search + doc fetching + deep analysis |
+**Primary metric:** token economy. Orchestrator runs on Opus (high-tier — needs orchestration quality), but mechanical work goes to cheaper models by default. Sonnet is on a separate billing bucket from Opus's "All models" quota — Sonnet delegation is effectively free relative to Opus.
+
+The decision boundary is NOT "10+ files" or "30 minutes". It is **task pattern**:
+
+| Task pattern | Default routing | Rationale |
+|---|---|---|
+| `bash X && parse output` | general-purpose × sonnet | Script-running + output-parsing = Sonnet's lane |
+| Read 200-line log, identify failure | general-purpose × haiku | Single-shot output triage |
+| Run 3 verification commands, summarize | secretary × haiku | Sequential bash + summary |
+| Recipe-based code work (migrations, retag waves, format conversions, parity tests) | general-purpose × sonnet | Pattern is established, execution is mechanical |
+| Multi-file {{src_dir}}/ implementation | coder × sonnet | Native lane (Unity/ECS) |
+| Vault doc edits / formatting / file org | secretary × haiku | Native lane |
+| Web/docs lookup (>1 fetch) | researcher × sonnet | Always |
+| Codebase exploration (>3 reads) | Explore × sonnet | Pass `model: "sonnet"` explicitly |
+| Architecture / API surface / spec design | inline (Opus) | Decision needs Opus reasoning |
+| 1–3 simple tool calls, no parsing | inline | Agent overhead (~70K entry tax) outweighs benefit |
+
+**The rule:** when in doubt, delegate. A useless Sonnet/Haiku spawn costs cheap-bucket tokens. The same waste inline costs binding Opus quota.
+
+**Validated (S185):** 3 bash → Python migrations (438 production LOC + 526 test LOC + 6 consumer edits + ruff/ty/pytest green) done by general-purpose × sonnet in ~30K total tokens, ~$0.23 worker cost vs ~$1.35 inline-Opus equivalent. Net savings ~50% even after orchestration overhead.
+
+> See [[../../../memory/feedback_delegation_token_economy|memory: token-economy routing]] for the underlying feedback rule.
 
 
 ## 6b. External Codex Operator
@@ -166,7 +177,7 @@ Assets/Codebase/Core/Data/. Use Read to examine the top files. Quick scan — ~1
 
 ## 6c. External Gemini Operator
 
-> Full protocol: [[dmrzl/tooling/GEMINI_CLI|GEMINI_CLI.md]].
+> Full protocol: [[dmrzl/tooling/GEMINI|GEMINI.md]].
 
 
 ## 7. Agent Teams (Parallel Persistent Teammates)
@@ -315,6 +326,7 @@ Review `.claude/feedback-loops/agent-usage.log`. Check:
 - Delegating user communication to subagents (main agent's job).
 - Using general-purpose when a specialized agent exists (loses domain knowledge).
 - Ignoring `maxTurns` enforcement — if agent hits limit, task was too broad.
+- **Orchestrator inline-running `pytest`, `ruff`, `git log`, `grep -rn`, `wc -l`, log greps, and synthesizing output itself.** Each of those is a Sonnet/Haiku tool-call wrapper task that returns a 2-line summary. Orchestrator decides what to do with the summary — it does not parse the raw output.
 
 ## 10. Coder Workflow
 

@@ -1,33 +1,13 @@
 ---
 name: coder
 description: |
-  Use this agent to implement pre-planned code changes in {{project_name}} Unity/C# code ({{src_dir}}/ directory only). The coder does NOT research or design — it receives a complete implementation brief (what to build, which files, expected behavior) and executes it. Trigger for: writing new ECS systems/components, fixing C# bugs, refactoring Unity code, writing tests. Always prepare context BEFORE spawning.
-
-  Do NOT use coder for: bash scripts, hooks, .claude/ config, vault files, skill files, CLAUDE.md edits, or any non-Unity code. Those go inline (orchestrator) or secretary.
-
-  <example>
-  Context: Orchestrator prepared a brief with research results
-  user: "Implement phenotype-to-stats wiring per the brief below"
-  assistant: "I'll use the coder agent with the prepared implementation brief."
-  <commentary>
-  Pre-researched task with clear spec → delegate to coder.
-  </commentary>
-  </example>
-
-  <example>
-  Context: Bug diagnosed by explorer, fix identified
-  user: "Apply the fix: rename RewardValue to Reward in EntityDefinitionBootstrap.cs lines 38-139"
-  assistant: "I'll use the coder agent with the exact fix specification."
-  <commentary>
-  Diagnosed bug with known fix → delegate to coder.
-  </commentary>
-  </example>
+  Use to implement pre-planned Unity/C# code changes in {{src_dir}}/ only. Receives a complete brief (objective, spec, context, constraints) and executes — no research, no design. Triggers: writing new ECS systems/components, fixing C# bugs, refactoring Unity code, writing tests. Always prepare context BEFORE spawning. NOT for: bash scripts, hooks, .claude/ config, vault files, skill files, CLAUDE.md — those go inline or to secretary.
 model: claude-sonnet-4-6
 color: green
 maxTurns: 20
 permissionMode: acceptEdits
 memory: project
-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "TodoWrite"]
+tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "TodoWrite", "mcp__obsidian__read-note", "mcp__obsidian__search-vault"]
 audience: public
 ---
 
@@ -90,6 +70,7 @@ Do NOT keep trying variations. The orchestrator will research the issue, consult
 ## Key context
 
 - Unity project at `{{src_dir}}/Assets/Codebase/`
+- **Vault access (spec/plan reads only): use `mcp__obsidian__read-note` / `search-vault`. Never use the `Read` tool on `vault/` paths.** Vault name is `"vault"`. Coder does NOT write to vault — escalate vault writes to secretary.
 - Tests: EditMode at `{{src_dir}}/Assets/Tests/EditMode/`, PlayMode at `{{src_dir}}/Assets/Tests/PlayMode/`
 - Extract-to-Static pattern: put math in `public static` methods for testability
 - ECS safety: collect-first before structural changes; singleton resets BEFORE structural changes

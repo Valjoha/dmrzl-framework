@@ -16,7 +16,7 @@ The `dmrzl-start` skill auto-loads on session start:
 
 1. `vault/dmrzl/session/HANDOFF.md` — previous session state (ALWAYS FIRST)
 2. `vault/dmrzl/identity/CORE.md` — shared rules
-3. `vault/dmrzl/tooling/CLAUDE_CODE.md` — Claude-specific config
+3. `vault/dmrzl/tooling/CLAUDE.md` — Claude-specific config
 
 If Obsidian MCP is available, prefer `mcp__obsidian__read-note` over the `Read` tool for vault files.
 

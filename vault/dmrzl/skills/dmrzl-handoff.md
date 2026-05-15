@@ -1,12 +1,11 @@
 ---
 name: session-handoff
 tags: [dmrzl, skill, session]
-type: skill
+type: config
 status: active
 description: "End-of-session distillation and handoff. Use when user says 'handoff', 'wrap up', 'end session', or is finishing a work session. Extracts decisions, patterns, state changes into memory files and finalizes the per-session handoff file. Do NOT use mid-session — use save-session for incremental saves."
 audience: public
 ---
-
 # Session Handoff & Distillation — Long Form
 
 > Up: [[dmrzl/skills|Skills]] · Short form: `.claude/skills/dmrzl-handoff/SKILL.md` · `.gemini/skills/dmrzl-handoff/SKILL.md`
@@ -17,7 +16,7 @@ Use this protocol at the end of every work session (or when explicitly asked to 
 
 Every session has its own file at `vault/dmrzl/session/handoffs/S{N}.md`. `next-session.sh` creates it as a `status: active` stub at session start. `dmrzl-handoff` finalizes it with `status: complete` and full content.
 
-`vault/dmrzl/session/INDEX.md` is a markdown table — one row per session — that gives a fast overview without loading individual session files. Updated via `.claude/scripts/append-index-row.sh` (mkdir-locked, idempotent replace per session number).
+`vault/dmrzl/session/INDEX.md` is a markdown table — one row per session — that gives a fast overview without loading individual session files. Updated via `.claude/scripts/append-index-row.py` (mkdir-locked, idempotent replace per session number).
 
 There is **no longer** a single shared `HANDOFF.md`. The pre-S171 history lives frozen in `vault/archive/HANDOFF-pre-split.md`.
 
@@ -35,7 +34,7 @@ There is **no longer** a single shared `HANDOFF.md`. The pre-S171 history lives 
 ## Cross-Platform Rules
 
 - `S{N}.md` is **per-session** and is owned by the platform that opened that session number. Hard-coded per skill: Claude → `platform: claude-code`, Gemini → `platform: gemini-cli`, Codex → `platform: codex`.
-- `INDEX.md` is shared continuity for all platforms. Append-only via `append-index-row.sh`.
+- `INDEX.md` is shared continuity for all platforms. Append-only via `append-index-row.py`.
 - `models:` frontmatter list is the contributor list for that session, not just the orchestrator.
 - `compact:` is ≤200 chars and survives context compaction. The agent can recover state by re-reading its own `S{N}.md` after compaction.
 
@@ -46,7 +45,7 @@ There is **no longer** a single shared `HANDOFF.md`. The pre-S171 history lives 
 3. **Extract patterns/gotchas** → append to `vault/{{project_slug}}/log/patterns.md`
 4. **Update architecture** → `vault/{{project_slug}}/log/project-state.md` (if changed)
 5. **Write `S{N}.md`** with `status: complete` and full body (see schema below). MUST happen before step 6.
-6. **Append-index row** via `.claude/scripts/append-index-row.sh` (locked, idempotent — replaces the `(in progress)` row).
+6. **Append-index row** via `.claude/scripts/append-index-row.py` (locked, idempotent — replaces the `(in progress)` row).
 7. **Session rating** — ask user inline (`Оцінка сесії N? (1–5)`), append to `vault/dmrzl/session/session-ratings.jsonl`.
 
 ## S{N}.md Schema

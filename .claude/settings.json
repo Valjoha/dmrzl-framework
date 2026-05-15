@@ -5,16 +5,23 @@
       "mcp__obsidian__read-note",
       "mcp__obsidian__edit-note",
       "mcp__obsidian__create-note",
+      "mcp__obsidian__add-tags",
+      "mcp__obsidian__move-note",
       "mcp__obsidian__list-available-vaults"
     ]
   },
   "hooks": {
     "SessionStart": [
       {
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/dmrzl-session-start.sh"
+            "command": "python3 .claude/scripts/next-session.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/dmrzl-session-start.py"
           }
         ]
       }
@@ -25,7 +32,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/safety-check.sh"
+            "command": "python3 .claude/hooks/safety-check.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/block-service-commit.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/bash-tool-advisor.py"
           }
         ]
       },
@@ -34,22 +49,42 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/block-meta-edit.sh"
+            "command": "python3 .claude/hooks/block-meta-edit.py"
           },
           {
             "type": "command",
-            "command": "bash .claude/hooks/check-vault-language.sh"
+            "command": "python3 .claude/hooks/check-vault-language.py"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Read|Edit|Write|mcp__obsidian__.*",
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/file-tracker.sh"
+            "command": "python3 .claude/hooks/memory-guardrail.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Edit|Write|mcp__obsidian__read-note|mcp__obsidian__edit-note|mcp__obsidian__create-note",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/file-tracker.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/telemetry-stop.py"
           }
         ]
       }

@@ -15,20 +15,24 @@ session use.
 ## What's included
 
 - **`CLAUDE.md`** — Claude Code entrypoint with discipline rules.
-- **6 process skills** (`.claude/skills/`) — `dmrzl-spec`, `dmrzl-review`,
-  `dmrzl-start`, `dmrzl-handoff`, `dmrzl-context`, `dmrzl-write-a-skill`.
+- **11 process skills** (`.claude/skills/`) — core: `dmrzl-spec`,
+  `dmrzl-review`, `dmrzl-start`, `dmrzl-handoff`, `dmrzl-context`,
+  `dmrzl-write-a-skill`. Lifecycle: `dmrzl-profile`, `dmrzl-forget`,
+  `dmrzl-service`, `dmrzl-service-end`, `dmrzl-service-promote`.
   Slash-invoked.
 - **4 specialized agents** (`.claude/agents/`) — `architect`, `coder`,
   `secretary`, `researcher`. Multi-agent delegation pattern with structured
   briefs (Why / Objective / Output / Constraints).
-- **6 safety hooks** (`.claude/hooks/`) — destructive command blocking,
-  meta-edit prevention, vault language guard, memory guardrail, file
-  tracking, session start.
-- **7 protocols** (`vault/dmrzl/protocols/`) — delegation rules, agent
-  guides, verification discipline, brief templates.
-- **Setup tool** (`.claude/scripts/setup.sh`) — fills `{{placeholder}}`
-  templates with your project values via interactive prompts.
-- **Tooling config** (`vault/dmrzl/tooling/CLAUDE_CODE.md`) — MCP server
+- **9 safety hooks** (`.claude/hooks/`) — destructive command blocking,
+  service-mode commit guard, bash-tool advisor, meta-edit prevention,
+  vault language guard, memory guardrail, file tracking, session start,
+  telemetry rotation. Python-based (PEP 723).
+- **8 protocols** (`vault/dmrzl/protocols/`) — delegation rules, agent
+  guides, verification discipline, TDD, brief templates.
+- **Setup tool** (`.claude/scripts/setup.py`) — fills `{{placeholder}}`
+  templates with your project values via interactive prompts. PEP 723
+  standalone, requires only `python3`.
+- **Tooling config** (`vault/dmrzl/tooling/CLAUDE.md`) — MCP server
   recovery protocol, tool fallback chain, Rider/Unity integration patterns.
 - **Identity layer** (`vault/dmrzl/identity/CORE.md`, `PERSONA.md`) —
   shared discipline rules + agent persona definition.
@@ -49,8 +53,8 @@ session use.
 ```sh
 git clone https://github.com/Valjoha/dmrzl-framework.git my-agent-workspace
 cd my-agent-workspace
-./.claude/scripts/setup.sh init      # interactive prompts → setup.config.env
-./.claude/scripts/setup.sh apply     # replace {{placeholders}} with your values
+./.claude/scripts/setup.py init      # interactive prompts → setup.config.env
+./.claude/scripts/setup.py apply     # replace {{placeholders}} with your values
 # open vault/ in Obsidian, open repo in Claude Code, start a session
 ```
 
@@ -64,9 +68,9 @@ CLAUDE.md      ← Claude Code entrypoint
 
 .claude/       ← Claude Code adapter
   agents/      ← 4 specialized subagents
-  skills/      ← 7 process skills
-  hooks/       ← 6 safety hooks
-  scripts/     ← setup.sh + atomic per-session counter + mcp_ping.py
+  skills/      ← 11 process skills
+  hooks/       ← 9 safety hooks (Python)
+  scripts/     ← setup.py + atomic per-session counter + mcp_ping.py
 
 vault/         ← Obsidian vault, single source of truth
   dmrzl/       ← agent's instructions (identity, protocols, skills, tooling)
@@ -82,7 +86,7 @@ Discipline lives in vault docs; the platform adapter is thin glue.
 
 ## How to test on your own project
 
-After `setup.sh apply` the workspace is configured for you.
+After `setup.py apply` the workspace is configured for you.
 
 1. **Start a session** — `cd` into the workspace, run `claude`. The
    `dmrzl-start` skill loads `INDEX.md` + the previous handoff + `CORE.md`.

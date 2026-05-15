@@ -8,7 +8,10 @@ cache_safe: true
 tags: [code-review, quality, spec-compliance, cross-model]
 related_skills: [dmrzl-spec, dmrzl-debug]
 requires_tools: [rider-mcp]
+type: config
+status: active
 ---
+<!-- GENERATED FROM vault/dmrzl/skills-src/dmrzl-review/SKILL.md -- DO NOT EDIT. Run sync-skills.py to refresh. -->
 # Three-Stage Code Review
 
 Detailed prompts and gotchas: [REFERENCE.md](REFERENCE.md)

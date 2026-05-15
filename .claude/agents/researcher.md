@@ -1,38 +1,11 @@
 ---
 name: researcher
 description: |
-  Use this agent for online research, documentation lookups, API reference checks, and gathering information from external sources. Trigger for: finding Unity/DOTS documentation, checking library APIs, researching best practices, or any task requiring web search or doc fetching.
-
-  <example>
-  Context: User needs Unity DOTS documentation
-  user: "How does IJobEntity work in Entities 1.x?"
-  assistant: "I'll use the researcher agent to look up the latest IJobEntity documentation."
-  <commentary>
-  Documentation lookup → delegate to researcher.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User needs to understand an API
-  user: "What's the correct way to use DynamicBuffer with Burst?"
-  assistant: "I'll use the researcher agent to find the DynamicBuffer + Burst documentation."
-  <commentary>
-  API reference check → delegate to researcher.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User wants best practices research
-  user: "What are common ECS patterns for ability cooldown systems?"
-  assistant: "I'll use the researcher agent to gather ECS cooldown patterns."
-  <commentary>
-  Best practices research → delegate to researcher.
-  </commentary>
-  </example>
+  Use for online research, documentation lookups, API reference checks, and gathering information from external sources. Triggers: Unity/DOTS docs, library API checks, best practices research, any task requiring web search or doc fetching (>1 fetch). Uses context7 MCP first, then WebSearch.
 model: claude-sonnet-4-6
 color: white
 maxTurns: 20
-tools: ["Read", "Write", "Edit", "Glob", "Grep", "WebSearch", "WebFetch"]
+tools: ["Read", "Write", "Edit", "Glob", "Grep", "WebSearch", "WebFetch", "mcp__obsidian__read-note", "mcp__obsidian__search-vault", "mcp__obsidian__create-note", "mcp__obsidian__edit-note"]
 audience: public
 ---
 
@@ -74,6 +47,7 @@ You are a research agent for {{project_name}} (Unity 6 ECS action-strategy game)
 - NOT using: legacy MonoBehaviour patterns, UGUI, IMGUI, classic render pipeline
 - Project at `{{src_dir}}/Assets/Codebase/`
 - Vault docs at `vault/`
+- **Vault access: use `mcp__obsidian__read-note` / `search-vault` / `create-note` / `edit-note`. Never use the `Read` tool on `vault/` paths.** Vault name is `"vault"`. Use these for prior-research checks AND for writing new research notes.
 
 ## Telemetry (MANDATORY)
 

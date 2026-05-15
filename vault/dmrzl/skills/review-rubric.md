@@ -1,6 +1,6 @@
 ---
 tags: [dmrzl, skill, review]
-type: reference
+type: source
 status: active
 created: 2026-03-26
 audience: public

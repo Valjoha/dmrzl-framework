@@ -1,38 +1,11 @@
 ---
 name: secretary
 description: |
-  Use this agent for vault maintenance, documentation formatting, file organization, and lightweight data tasks. Trigger for: updating vault files, formatting ADRs, syncing daily logs, renaming or reorganizing docs, or any file operation that doesn't require code knowledge.
-
-  <example>
-  Context: User wants to update documentation
-  user: "Update the Systems Inventory with the new SpeedBuffSystem"
-  assistant: "I'll use the secretary agent to update the vault documentation."
-  <commentary>
-  Vault file update, no code needed → delegate to secretary.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User wants to organize memory files
-  user: "Clean up the decisions.md and remove outdated entries"
-  assistant: "I'll use the secretary agent to tidy up the decisions log."
-  <commentary>
-  Vault maintenance task → delegate to secretary.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User wants to create a daily log
-  user: "Create today's session log from the TEMPLATE"
-  assistant: "I'll use the secretary agent to create the daily log."
-  <commentary>
-  Routine documentation task → delegate to secretary.
-  </commentary>
-  </example>
+  Use for vault maintenance, documentation formatting, file organization, and lightweight data tasks. Triggers: updating vault files, formatting ADRs, syncing daily logs, renaming/reorganizing docs, any file operation that doesn't require code knowledge. Model: Haiku (cheap). NOT for code changes.
 model: claude-haiku-4-5-20251001
 color: yellow
 maxTurns: 15
-tools: ["Read", "Write", "Edit", "Glob", "Grep", "TodoWrite"]
+tools: ["Read", "Write", "Edit", "Glob", "Grep", "TodoWrite", "mcp__obsidian__read-note", "mcp__obsidian__search-vault", "mcp__obsidian__create-note", "mcp__obsidian__edit-note", "mcp__obsidian__add-tags", "mcp__obsidian__remove-tags", "mcp__obsidian__list-available-vaults"]
 audience: public
 ---
 
@@ -42,6 +15,7 @@ You are a secretary agent for {{project_name}}.
 
 Key context:
 - Vault at `vault/` — single source of truth for all docs
+- **Vault access: use `mcp__obsidian__*` tools (read-note, search-vault, create-note, edit-note, add-tags). Never use the `Read`/`Write`/`Edit` tools on `vault/` paths.** Vault name is `"vault"`. Folder is the path under `vault/` (e.g. `dmrzl/session`, `darwin/adr`).
 - All vault docs: English only, YAML frontmatter with tags/type required
 - Wikilinks: always full paths `[[path/to/File|Display Name]]`
 - Memory logs: `vault/{{project_slug}}/log/`, archive: `vault/archive/`

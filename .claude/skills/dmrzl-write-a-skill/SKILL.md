@@ -1,6 +1,6 @@
 ---
 name: dmrzl-write-a-skill
-description: Create a new DMRZL skill (`.claude/skills/dmrzl-*/SKILL.md`) with proper structure, trigger description, and ≤100-line discipline. Use when user says 'write a skill', 'new skill', 'create skill', 'додай скіл', 'напиши скіл', or wants to author/refactor any DMRZL skill. Enforces dmrzl- naming, vault references, hook tracking compatibility. Skill vs agent decision baked in.
+description: Create a new DMRZL skill (`vault/dmrzl/skills-src/dmrzl-*/SKILL.md` — canonical source, generators propagate to platforms) with proper structure, trigger description, and ≤100-line discipline. Use when user says 'write a skill', 'new skill', 'create skill', 'додай скіл', 'напиши скіл', or wants to author/refactor any DMRZL skill. Enforces dmrzl- naming, vault references, hook tracking compatibility. Skill vs agent decision baked in.
 audience: public
 category: tools
 platforms: [general]
@@ -8,8 +8,10 @@ cache_safe: true
 tags: [meta, skill-authoring, framework]
 related_skills: [skill-evolve]
 requires_tools: []
+type: config
+status: active
 ---
-
+<!-- GENERATED FROM vault/dmrzl/skills-src/dmrzl-write-a-skill/SKILL.md -- DO NOT EDIT. Run sync-skills.py to refresh. -->
 # Write a DMRZL Skill
 
 A focused, single-purpose prompt the agent loads when description matches user intent. Different from agent (multi-step executor with own model+turns) and from vault docs (passive reference).
@@ -30,12 +32,12 @@ A focused, single-purpose prompt the agent loads when description matches user i
 
 3. **Draft SKILL.md** — keep under 100 lines. Split into companion files when you exceed it.
 
-4. **Review against checklist** (below). Self-grill before showing to user.
+4. **Review against checklist** in `vault/dmrzl/skills/dmrzl-write-a-skill.md` long form. Self-grill before showing to user.
 
 ## SKILL.md Structure
 
 ```
-.claude/skills/dmrzl-<name>/
+vault/dmrzl/skills-src/dmrzl-<name>/
 ├── SKILL.md          # required, ≤100 lines
 ├── LANGUAGE.md       # optional — shared vocabulary (see dmrzl-dots/LANGUAGE.md)
 ├── REFERENCE.md      # optional — detailed docs split off when SKILL.md grows
@@ -64,40 +66,26 @@ The description is **the only thing the agent sees** when deciding to load. Trea
 - Include both English **and** Ukrainian trigger words for user-facing skills
 - Include "Do NOT use for X — use Y instead" when scope overlaps another skill
 - Write in third person, no "I will", no "this skill"
+- **Bias toward false negatives.** FPs silent (wrong route); FNs surface as user repeating. Full asymmetric-tuning rationale in long-form § Predicate Discipline.
 
 ## DMRZL Conventions
 
 - **Naming:** `dmrzl-<lowercase-hyphen>` for project-namespaced skills
 - **Body language:** English. User-facing examples may include Ukrainian.
 - **Vault references:** absolute paths from workspace root (`vault/dmrzl/skills/...`). Use Obsidian MCP, never `Read` tool on vault files.
-- **Hook tracking:** every skill invocation logs to `.claude/feedback-loops/session-activity.log` via `skill-usage-tracker.sh`. No action needed — automatic.
-- **Vault long-form:** if a skill needs >100 lines of detail, put long-form in `vault/dmrzl/skills/<skill-name>.md` and reference from SKILL.md (existing pattern: `dmrzl-dots`, `dmrzl-debug`).
+- **Hook tracking:** every skill invocation logs to `.claude/feedback-loops/session-activity.log` automatically.
+- **Vault long-form:** if a skill needs >100 lines of detail, put long-form in `vault/dmrzl/skills/<skill-name>.md` and reference from SKILL.md.
 
 ## When to Split
 
 Split into companion files when SKILL.md exceeds 100 lines OR content has distinct domains:
 
-- **LANGUAGE.md** — shared vocabulary the skill must use exactly (terminology discipline)
-- **REFERENCE.md** — long-form workflow detail (multi-stage pipelines, prompt templates)
+- **LANGUAGE.md** — shared vocabulary the skill must use exactly
+- **REFERENCE.md** — long-form workflow detail
 - **EXAMPLES.md** — concrete worked examples
-- **scripts/** — deterministic operations (saves tokens vs regenerating)
+- **scripts/** — deterministic operations
 
 Reference companion files explicitly: `See [LANGUAGE.md](LANGUAGE.md) for ECS terminology.`
-
-## Review Checklist
-
-Before declaring done, verify:
-
-- [ ] Description has explicit triggers ("Use when...") incl. Ukrainian if user-facing
-- [ ] Description ≤1024 chars
-- [ ] Description names overlapping skills with "Do NOT use for X"
-- [ ] SKILL.md ≤100 lines
-- [ ] No time-sensitive info (dates, "as of session N")
-- [ ] Consistent terminology (drift breaks the prompt — use LANGUAGE.md if needed)
-- [ ] References one level deep only (SKILL.md → companion, not chains)
-- [ ] Concrete examples for non-trivial workflows
-- [ ] Skill vs agent decision justified if borderline
-- [ ] Vault paths absolute, Obsidian MCP for reads
 
 ## Anti-patterns
 
@@ -106,8 +94,9 @@ Before declaring done, verify:
 - Description without trigger phrases — agent guesses, mistriggers
 - Duplicating CLAUDE.md or CORE.md content — skill should reference, not restate
 - Skill that wraps a single tool call — just call the tool inline
-- Workflow summary in description — agent reads description and skips skill body, taking the shortcut
+- Workflow summary in description — agent reads description and skips skill body
+- Description broad enough to hit unrelated tasks — FPs silent, FNs surface
 
 ## Going Deeper
 
-For TDD-for-skills (RED-GREEN-REFACTOR), pressure scenarios, CSO patterns, rationalization tables, and bulletproofing discipline skills against rationalization, see `vault/dmrzl/skills/dmrzl-write-a-skill.md` (long form). Load it when designing a discipline-enforcing skill or when the SKILL.md body alone isn't producing the agent compliance you need.
+For TDD-for-skills (RED-GREEN-REFACTOR), pressure scenarios, CSO patterns, rationalization tables, full review checklist, and bulletproofing discipline skills against rationalization, see `vault/dmrzl/skills/dmrzl-write-a-skill.md`.

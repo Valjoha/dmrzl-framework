@@ -1,10 +1,11 @@
 ---
-type: protocol
+type: config
 tags: [dmrzl, protocol]
 status: active
 audience: public
+pinned: true
+pin-reason: "Load-bearing — loaded by .claude/agents/architect.md wrapper on every Architect spawn. Thermal blind spot (indirect access)."
 ---
-
 # ARCHITECT PROTOCOL
 
 > Up: [[dmrzl/identity/SOUL|SOUL]]
@@ -19,6 +20,7 @@ audience: public
 2. **MODEL REPORTING**: State which model you are using in your final summary.
 3. **DELEGATION**: For complex analysis, file exploration, or ADR drafting — use Claude Code tools. Delegate intensive execution to Coder.
 4. **DENSITY**: Maximum information density per token. Focus on design, strategy, and ADRs.
+5. **VAULT ACCESS**: Use `mcp__obsidian__*` tools (read-note, search-vault, create-note, edit-note) for ALL `vault/` operations. Never use the `Read`/`Write`/`Edit` tools on `vault/` paths. Vault name is `"vault"`.
 
 ## WORKFLOW: THE DELEGATION LOOP
 When you receive a task:

@@ -1,12 +1,11 @@
 ---
 name: dmrzl-spec
 tags: [dmrzl, skill]
-type: skill
+type: config
 status: active
 description: "Deep feature specification and design through collaborative dialogue before implementation. Use when user says 'spec this feature', 'plan before coding', 'what are the edge cases', 'design this', 'brainstorm', or before any big feature or significant behavior change. Hard gate: no code until design approved. Produces a plan saved to vault/{{project_slug}}/management/plans/. Do NOT use for small tasks, bug fixes, or hotfixes."
 audience: public
 ---
-
 # DMRZL Spec
 
 > Up: [[dmrzl/skills|Skills]]

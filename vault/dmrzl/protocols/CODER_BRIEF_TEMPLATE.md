@@ -1,6 +1,6 @@
 ---
 tags: [dmrzl, protocol]
-type: protocol
+type: config
 status: active
 audience: public
 ---

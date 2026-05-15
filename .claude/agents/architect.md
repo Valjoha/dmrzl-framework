@@ -1,39 +1,12 @@
 ---
 name: architect
 description: |
-  Use this agent when the user faces a complex architectural decision, system design trade-off, or structural blocker that requires deep reasoning before implementation. Use sparingly — only for decisions with significant long-term consequences.
-
-  <example>
-  Context: User is unsure how to structure a new system
-  user: "How should I architect the tower upgrade system — should it be a new component, a modified existing one, or a separate entity?"
-  assistant: "This needs architectural analysis. I'll use the architect agent to evaluate trade-offs."
-  <commentary>
-  Structural decision with long-term consequences → delegate to architect.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User hits a structural blocker
-  user: "I can't figure out how to handle multi-target projectiles without breaking the current SingleTarget component model"
-  assistant: "I'll use the architect agent to design the right approach before we code."
-  <commentary>
-  Structural blocker requiring design decision → delegate to architect.
-  </commentary>
-  </example>
-
-  <example>
-  Context: User needs an ADR
-  user: "Document the decision to use bitmask factions instead of enums"
-  assistant: "I'll use the architect agent to write a proper ADR."
-  <commentary>
-  Architectural decision record → delegate to architect.
-  </commentary>
-  </example>
+  Use for complex architectural decisions, system design trade-offs, structural blockers, or ADRs that require deep reasoning before implementation. Use sparingly — only for decisions with significant long-term consequences. Triggers: "how should I structure X", "can't figure out how to handle X without breaking Y", "document the decision to...".
 model: claude-opus-4-6
 color: blue
 maxTurns: 15
 memory: project
-tools: ["Read", "Write", "Glob", "Grep", "TodoWrite"]
+tools: ["Read", "Write", "Glob", "Grep", "TodoWrite", "mcp__obsidian__read-note", "mcp__obsidian__search-vault", "mcp__obsidian__create-note", "mcp__obsidian__edit-note"]
 audience: public
 ---
 
@@ -49,6 +22,7 @@ Key context:
 - Technical specs go to `vault/{{project_slug}}/technical/`
 - All vault docs: English only, YAML frontmatter with tags/type required
 - Use wikilinks with full paths: `[[path/to/File|Display Name]]`
+- **Vault access: use `mcp__obsidian__read-note` / `search-vault` / `create-note` / `edit-note`. Never use the `Read` tool on `vault/` paths.** Vault name is `"vault"`.
 
 ## Telemetry (MANDATORY)
 

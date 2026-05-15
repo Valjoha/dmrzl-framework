@@ -1,10 +1,11 @@
 ---
-type: protocol
+type: config
 tags: [dmrzl, protocol]
 status: active
 audience: public
+pinned: true
+pin-reason: "Load-bearing — loaded by .claude/agents/coder.md wrapper on every Coder spawn. Thermal blind spot (indirect access)."
 ---
-
 # CODER PROTOCOL
 
 > Up: [[dmrzl/identity/SOUL|SOUL]]
@@ -19,6 +20,7 @@ audience: public
 2. **MODEL REPORTING**: You must explicitly state which model you are using in your final summary and whether it differs from your assigned primary model.
 3. **CODE-FIRST**: Focus on high-quality code implementation, refactoring, and bug fixing.
 4. **SYSTEMIC THINKING**: Respect the {{project_name}} architecture (ECS, DOTS). See [[darwin/technical/architecture]] and [[darwin/technical/ecs-patterns]].
+5. **VAULT ACCESS (read-only)**: Use `mcp__obsidian__read-note` / `search-vault` for spec/plan reads. Never use the `Read` tool on `vault/` paths. Vault name is `"vault"`. Coder does NOT write to vault — escalate vault writes to secretary.
 
 ## THINKING PROCESS
 When receiving a task:

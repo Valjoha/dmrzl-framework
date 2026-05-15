@@ -8,23 +8,26 @@ cache_safe: false
 tags: [session-end, distillation, memory]
 related_skills: [dmrzl-start, dmrzl-dream]
 requires_tools: [obsidian-mcp-rs]
+type: config
+status: active
 ---
+<!-- GENERATED FROM vault/dmrzl/skills-src/dmrzl-handoff/SKILL.md -- DO NOT EDIT. Run sync-skills.py to refresh. -->
 # Session Handoff
 
 Write the handoff **inline** — no secretary agent needed.
 
 ## Procedure
 
-0. Log session end: `bash .claude/scripts/next-session.sh --end <session_number>`
+0. Log session end: `python3 .claude/scripts/next-session.py --end <session_number>`
 1. Gather data in parallel:
    - CI: `gh run list --repo Valjoha/{{project_name}} --workflow=ci.yml --limit 1`
-   - Own stub: read `vault/dmrzl/session/handoffs/S{N}.md` (created by `next-session.sh` at session start; has `status: active`)
+   - Own stub: read `vault/dmrzl/session/handoffs/S{N}.md` (created by `next-session.py` at session start; has `status: active`)
 2. Synthesize from conversation context (Template below).
 3. **Ask rating inline FIRST** — "Оцінка сесії N? (1-5)". NOT `AskUserQuestion` — plain text. Hold the value `R` for steps 4-5 below; without it the handoff frontmatter and INDEX row both end up `-`.
-4. **Write `vault/dmrzl/session/handoffs/S{N}.md`** — set `status: complete`, fill all frontmatter fields per template (including `rating: R` from step 3). This MUST happen BEFORE step 5 — INDEX must never reference an incomplete file.
+4. **Write `vault/dmrzl/session/handoffs/S{N}.md`** — set `status: archived` (canonical per S232 frontmatter normalization — finished handoffs are frozen reference), fill all frontmatter fields per template (including `rating: R` from step 3). This MUST happen BEFORE step 5 — INDEX must never reference an incomplete file.
 5. **Append-index row** — call (with `R` from step 3, NOT `-`):
    ```bash
-   bash .claude/scripts/append-index-row.sh \
+   python3 .claude/scripts/append-index-row.py \
        <N> <date> claude-code <title> <compact-≤80-chars> <R>
    ```
    The script handles locking and idempotent replace (overwrites the existing `(in progress)` row for this session).
@@ -45,7 +48,7 @@ Write the handoff **inline** — no secretary agent needed.
 
 ## Platform Value (Hard-Coded Per Skill)
 
-**This skill writes `platform: claude-code`.** The Gemini twin (`.gemini/skills/dmrzl-handoff/SKILL.md`) writes `platform: gemini-cli`. Codex invocations override at the brief level.
+**This skill writes `platform: claude-code`.** Codex+Gemini invocations override platform at SessionStart-hook time (`PLATFORM` env captured by `telemetry-stop.py`); the same vault-canonical SKILL.md generates the Codex/Gemini stubs at `.agents/skills/dmrzl-handoff/SKILL.md`.
 
 Do NOT read `platform:` from env at handoff time — env may have drifted across context compaction.
 
@@ -55,7 +58,7 @@ Do NOT read `platform:` from env at handoff time — env may have drifted across
 ---
 tags: [dmrzl, session, handoff]
 type: handoff
-status: complete
+status: archived
 session: {N}
 date: {YYYY-MM-DD}
 platform: claude-code
@@ -65,6 +68,7 @@ models: [opus, sonnet]
 rating: {1-5 or null}
 compact: "{≤200 chars summary that survives compaction}"
 title: "{short noun phrase}"
+schema_version: 2
 ---
 
 # Session {N}
@@ -109,8 +113,9 @@ For each vault directory modified this session:
 
 - One file per session (`handoffs/S{N}.md`). No "Previous Session" rotation.
 - **Always update `compact` frontmatter** — max 200 chars, survives compaction.
-- Strict ordering: S{N}.md BEFORE `append-index-row.sh`. INDEX must never reference an incomplete file.
+- Strict ordering: S{N}.md BEFORE `append-index-row.py`. INDEX must never reference an incomplete file.
 - No "Session Texture" (subjective, not actionable).
 - No full files-changed list (git log has it).
 - Patterns → append to `vault/{{project_slug}}/log/patterns.md`, not the session file.
 - Models stay in frontmatter (`models:`), not a separate footer section.
+- **`schema_version: 2`** is mandatory in every new handoff. If a field truly cannot be captured at runtime (e.g. session crashed before close), write the literal string `not-captured-at-runtime` — never `null`, `~`, or empty. Audit script: `.claude/scripts/handoff_audit.py --report`.

@@ -25,7 +25,7 @@ cd my-agent-workspace
 The framework ships with `{{placeholder}}` tokens for user-specific values (your name, project name, paths). Fill them in:
 
 ```sh
-./.claude/scripts/setup.sh init
+./.claude/scripts/setup.py init
 ```
 
 Interactive prompts will ask for 9 values:
@@ -47,19 +47,19 @@ This writes `setup.config.env` (gitignored). Review and edit if needed.
 Preview substitutions before applying:
 
 ```sh
-./.claude/scripts/setup.sh dry-run
+./.claude/scripts/setup.py dry-run
 ```
 
 Apply:
 
 ```sh
-./.claude/scripts/setup.sh apply
+./.claude/scripts/setup.py apply
 ```
 
 If you ever need to reverse (e.g. before contributing back upstream):
 
 ```sh
-./.claude/scripts/setup.sh reset
+./.claude/scripts/setup.py reset
 ```
 
 ## 3. Open the vault in Obsidian
@@ -117,7 +117,7 @@ When the session starts, the **`dmrzl-start` skill** auto-loads:
 
 - `vault/dmrzl/session/HANDOFF.md` (your session state — empty on first run)
 - `vault/dmrzl/identity/CORE.md` (the discipline rules)
-- `vault/dmrzl/tooling/CLAUDE_CODE.md` (Claude Code specifics)
+- `vault/dmrzl/tooling/CLAUDE.md` (Claude Code specifics)
 
 ### Codex CLI
 
@@ -172,7 +172,7 @@ Two files that personalize the agent:
 - **`vault/dmrzl/identity/PERSONA.md`** — the agent's voice, language, identity boundaries. The public version ships a generic English-default professional persona. Edit it freely — change the language, add domain-specific guidance, or rewrite the voice rules entirely.
 - **`vault/personal/USER.md`** — your role, expertise, preferences. The agent loads this on demand for context-sensitive responses (career questions, off-domain redirects).
 
-To switch language after initial setup: edit `LANGUAGE` in `setup.config.env`, run `./setup.sh reset` then `./setup.sh apply`. The persona's `language: <value>` line will be re-substituted.
+To switch language after initial setup: edit `LANGUAGE` in `setup.config.env`, run `./setup.py reset` then `./setup.py apply`. The persona's `language: <value>` line will be re-substituted.
 
 The friends-tier distribution ships a richer persona (literary coloring, voice phrasebook, ~160 sessions of accumulated discipline notes). The public version intentionally keeps things generic — yours to evolve.
 
@@ -197,20 +197,25 @@ The `dmrzl-write-a-skill` skill walks you through this with all the conventions.
 - **Skill doesn't trigger** — check the `description` field. It's the trigger predicate. Make it specific: "Use when X. Do NOT use for Y." Keywords in the description get matched.
 - **Hooks not firing** — both `.claude/settings.json` (Claude Code) and `.gemini/settings.json` (Gemini CLI) ship pre-wired. If you've edited those files, re-merge from `.claude/scripts/fixtures/PUBLIC_*_SETTINGS.json`.
 - **Vault tree empty in Obsidian** — make sure you opened the `vault/` subfolder, not the workspace root.
-- **`{{placeholder}}` text still in files** — `setup.sh apply` didn't run, or `setup.config.env` is missing keys. Run `setup.sh dry-run` to see what's left.
+- **`{{placeholder}}` text still in files** — `setup.py apply` didn't run, or `setup.config.env` is missing keys. Run `setup.py dry-run` to see what's left.
 
 ## Safety hooks (Claude Code + Gemini CLI)
 
-The framework ships four safety/tracking hooks and registers them in both `.claude/settings.json` and `.gemini/settings.json`. They fire automatically — no extra setup.
+The framework ships nine safety/tracking hooks (Python, PEP 723 standalone) and registers them in both `.claude/settings.json` and `.gemini/settings.json`. They fire automatically — no extra setup.
 
 | Hook | When | What it does |
 |------|------|--------------|
-| `safety-check.sh` | Before shell commands | Blocks `rm -rf`, `git reset --hard`, unauthorized `git commit/push`. Exit 2 = hard block. Bypass `git commit` with `PD_ALLOW_COMMIT=1` after explicit user approval. |
-| `block-meta-edit.sh` | Before file writes | Blocks edits to Unity `.meta` files (project-specific; harmless if you're not on Unity). |
-| `check-vault-language.sh` | Before file writes | Blocks Cyrillic content in `vault/` files (CORE.md § 1: docs are English only). Bypass with `DMRZL_ALLOW_VAULT_LANG=1`. |
-| `file-tracker.sh` | After file ops | Logs every Read/Write/Edit to `.claude/feedback-loops/session-activity.log` for telemetry. No effect on operation; passive observer. |
+| `safety-check.py` | Before shell commands | Blocks `rm -rf`, `git reset --hard`, unauthorized `git commit/push`. Exit 2 = hard block. Bypass `git commit` with `PD_ALLOW_COMMIT=1` after explicit user approval. |
+| `block-service-commit.py` | Before shell commands | When a session is in service-mode (meta-work on the agent itself), blocks commits to keep the session ephemeral. |
+| `bash-tool-advisor.py` | Before shell commands | Warns on patterns that should use dedicated tools (`cat`/`sed`/`echo` instead of `Read`/`Edit`/`Write`). |
+| `block-meta-edit.py` | Before file writes | Blocks edits to Unity `.meta` files (project-specific; harmless if you're not on Unity). |
+| `check-vault-language.py` | Before file writes | Blocks Cyrillic content in `vault/` files (CORE.md § 1: docs are English only). Bypass with `DMRZL_ALLOW_VAULT_LANG=1`. |
+| `memory-guardrail.py` | After file writes | Caps auto-memory growth (`memory/MEMORY.md` ≤200 lines). |
+| `file-tracker.py` | After file ops | Logs every Read/Write/Edit to `.claude/feedback-loops/session-activity.log` for telemetry. No effect on operation; passive observer. |
+| `dmrzl-session-start.py` | At session start | Runs the `dmrzl-start` skill load (INDEX, previous handoff, CORE.md). |
+| `telemetry-stop.py` | At session stop | Rotates the session-activity log into per-session snapshots. |
 
-Hooks are bash scripts in `.claude/hooks/`. Same scripts run on both platforms — input shape is parsed for either Claude Code's `tool_input` or Gemini's `params` field. Edit them freely; they're yours.
+Hooks are Python scripts in `.claude/hooks/` (PEP 723 inline script metadata, requires only `python3`). Same scripts run on both platforms — input shape is parsed for either Claude Code's `tool_input` or Gemini's `params` field. Edit them freely; they're yours.
 
 **Gemini-specific limitations** (vs Claude Code):
 - Subagents are sequential only — no parallel dispatch.

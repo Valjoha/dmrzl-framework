@@ -1,5 +1,5 @@
 ---
-description: "Smart vault context retrieval. Expands a topic query into related terms via GLOSSARY.md, then searches the vault and returns ranked results. Use when: agent needs vault context for a topic ('what do we know about X?', 'context for Y', 'load context on Z'), or before starting work on any domain area. Do NOT use for: simple file reads, git history, or code-only questions."
+description: "Smart vault context retrieval. Expands topic query via GLOSSARY.md, searches vault, returns ranked results. Use when: 'what do we know about X?', 'context for Y', 'load context on Z', or before starting domain work. Do NOT use for: simple file reads, git history, code-only questions."
 audience: public
 name: dmrzl-context
 category: tools
@@ -8,7 +8,10 @@ cache_safe: true
 tags: [vault, context-retrieval, search]
 related_skills: [dmrzl-spec, dmrzl-research]
 requires_tools: [obsidian-mcp-rs]
+type: config
+status: active
 ---
+<!-- GENERATED FROM vault/dmrzl/skills-src/dmrzl-context/SKILL.md -- DO NOT EDIT. Run sync-skills.py to refresh. -->
 # /dmrzl-context — Smart Vault Retrieval
 
 Transform a topic query into a ranked list of the most relevant vault notes. No external deps — GLOSSARY.md + Obsidian MCP only.
